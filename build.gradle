@@ -22,8 +22,56 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation("org.glassfish.jaxb:jaxb-xjc:4.0.6")
+	implementation("org.glassfish.jaxb:jaxb-runtime:4.0.6")
+	implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.4")
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+configurations{
+jaxb
+}
+
+def xjcTask(taskName,xsdRelativePath) {
+	println "Inside xjcTask -> Creating task - ${taskName} for xsd - ${xsdRelativePath}"
+	tasks.create(name: taskName, type: JavaExec) {
+		println "Inside ${taskName} , generating classes for xsd - ${xsdRelativePath}"
+		classpath configurations.jaxb
+		mainClass = 'com.sun.tools.xjc.XJCFacade'
+		args xsdRelativePath, '-d', "src/main/java/generated"
+	}
+}
+int taskCount = 0
+def xsdRelativePath = []
+tasks.register('xsdToJavaTask') {
+
+	println "Inside xsdToJavaTask - deleting src/main/java/generated"
+	def dir = new File('src/main/java/generated')
+	dir.deleteDir()
+	println "Inside xsdToJavaTask - creating src/main/java/generated"
+	dir.mkdir()
+	println 'Analyzing xsd folders and files'
+	def xsdSourceFolder = "src/main/resources"
+	def tree = fileTree(dir: xsdSourceFolder, include: '**/*.xsd')
+	tree.getFiles().each {
+		File file ->
+			{
+				def fileAbsolutePath = file.getAbsolutePath()
+				fileAbsolutePath = fileAbsolutePath.replaceAll("\\\\", "/")
+				xsdRelativePath.add(fileAbsolutePath.substring(fileAbsolutePath.indexOf(xsdSourceFolder)))
+				println "Inside xsdToJavaTask - Xsd to be processed - ${xsdRelativePath}"
+				taskCount++
+			}
+	}
+	println "Inside xsdToJavaTask - Total number of tasks to be created - ${taskCount}"
+
+}
+compileJava.dependsOn xsdToJavaTask
+for(int i=0;i<taskCount;i++) {
+	println "Creating task xsdToJava${i}"
+	xjcTask("xsdToJava${i}",xsdRelativePath.get(i))
+	compileJava.dependsOn "xsdToJava${i}"
 }

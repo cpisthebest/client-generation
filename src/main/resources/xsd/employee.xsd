@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+    <!-- Define the employee element as a complex type directly inline -->
+    <xs:element name="employee">
+        <xs:complexType>
+            <!-- Use xs:sequence to enforce a specific order for child elements -->
+            <xs:sequence>
+                <xs:element name="firstname" type="xs:string"/>
+                <xs:element name="lastname" type="xs:string"/>
+                <xs:element name="hiredate" type="xs:date" minOccurs="0"/> <!-- Optional element -->
+            </xs:sequence>
+            <!-- Add an attribute to the complex type -->
+            <xs:attribute name="employeeid" type="xs:positiveInteger" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
