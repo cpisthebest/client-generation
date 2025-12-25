@@ -19,8 +19,8 @@ repositories {
 }
 
 dependencies {
-	implementation("org.glassfish.jaxb:jaxb-xjc:4.0.6")
-	implementation("org.glassfish.jaxb:jaxb-runtime:4.0.6")
+	jaxb "org.glassfish.jaxb:jaxb-xjc:4.0.6"
+	jaxb "org.glassfish.jaxb:jaxb-runtime:4.0.6"
 	implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.4")
 }
 
@@ -34,17 +34,17 @@ def xjcTask(taskName,xsdRelativePath) {
 		println "Inside ${taskName} , generating classes for xsd - ${xsdRelativePath}"
 		classpath configurations.jaxb
 		mainClass = 'com.sun.tools.xjc.XJCFacade'
-		args xsdRelativePath, '-d', "src/main/java/generated"
+		args xsdRelativePath, '-d', "src/main/java"
 	}
 }
 int taskCount = 0
 def xsdRelativePath = []
 tasks.register('xsdToJavaTask') {
 
-	println "Inside xsdToJavaTask - deleting src/main/java/generated"
-	def dir = new File('src/main/java/generated')
+	println "Inside xsdToJavaTask - deleting src/main/java"
+	def dir = new File('src/main/java')
 	dir.deleteDir()
-	println "Inside xsdToJavaTask - creating src/main/java/generated"
+	println "Inside xsdToJavaTask - creating src/main/java"
 	dir.mkdir()
 	println 'Analyzing xsd folders and files'
 	def xsdSourceFolder = "src/main/resources"
